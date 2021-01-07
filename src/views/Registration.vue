@@ -9,17 +9,15 @@
 
 		<div v-if="step == -2">
 			<h1>reCAPTCHA privacy notice</h1>
-			<p>This page uses Google reCAPTCHA. By continuing, you agree to use reCAPTCHA, which may register tracking cookies in your browser.</p>
-			<p>You may review the Google Privacy Policy at <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a>.</p>
+			<p>To prevent abuse, this registration form uses Google reCAPTCHA to verify that you are a human. By continuing, you agree to use reCAPTCHA, which may register tracking cookies in your browser.</p>
+			<p>You may review the Google Privacy Policy at <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">https://policies.google.com/privacy</a>.</p>
 
 			<button @click="start">I understand and wish to proceed</button>
 			<br><br>
 
 			<h1>Registering without reCAPTCHA</h1>
-			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email.</p>
+			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
 			<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
-			<br>
-			<address>registration@themanaworld.org</address>
 		</div>
 
 		<div v-if="step == -3">
@@ -28,10 +26,8 @@
 			<br><br>
 
 			<h1>Registering without reCAPTCHA</h1>
-			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email.</p>
+			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
 			<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
-			<br>
-			<address>registration@themanaworld.org</address>
 		</div>
 
 		<div v-if="step == -1">
@@ -40,19 +36,17 @@
 			If you are using an ad blocker or tracker blocker please whitelist this page and refresh to continue.</p>
 
 			<h1>Registering without reCAPTCHA</h1>
-			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email.</p>
+			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
 			<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
-			<br>
-			<address>registration@themanaworld.org</address>
 		</div>
 
 		<!-- XXX: do we want to add the game rules here? -->
 
 		<div v-if="step == 1">
 			<h1>Email address</h1>
-			<p>We will never give your email address to someone else or send you spam.</p>
+			<p>We will never disclose your email address to anyone or send you spam.</p>
 			<p>Providing an email address is entirely optional but it is the only way to request a password reset, should you loose access to your account.
-			If you did not provide an email address you will be unable to perform password resets.</p>
+			If you do not provide an email address you will be unable to perform password resets.</p>
 			<form @submit.prevent="checkEmail">
 				<label for="email">Enter your email (optional):</label>
 				<input v-model="user.email" type="email" maxlength="39" id="email" ref="_email" placeholder="your@email.com">
@@ -70,10 +64,10 @@
 				<p>Please choose another username.</p>
 			</div>
 
-			<form @submit.prevent="checkUser">
+			<form @submit.prevent="checkUser" @input="checkFormIsValid">
 				<label for="user">Choose a username:</label>
 				<input @input="taken = false" v-model="user.name" type="text" id="user" ref="_user" placeholder="type your username here" minlength="4" maxlength="23" pattern="^[a-zA-Z0-9]{4,23}$" title="4-23 characters, alphanumeric" required>
-				<button type="submit" v-if="user.name">Next step &rarr;</button>
+				<button type="submit" :class="{invalid: !formIsValid}">Next step &rarr;</button>
 			</form>
 		</div>
 
@@ -88,18 +82,18 @@
 				<a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener">verified by haveibeenpwned.com</a>
 			</div>
 
-			<form @submit.prevent="checkPassword">
+			<form @submit.prevent="checkPassword" @input="checkFormIsValid">
 				<div class="pass-box">
 					<label for="password">Choose a unique password:</label>
-					<input v-model="user.pwd" :type="visible ? 'text' : 'password'" id="password" ref="_password" placeholder="type your password here" minlength="8" maxlength="23" pattern="^[a-zA-Z0-9]{8,23}$" title="8-23 characters, alphanumeric" required>
+					<input v-model="user.pwd" :type="visible ? 'text' : 'password'" @input="resetPwValidity" id="password" ref="_password" placeholder="type your password here" minlength="8" maxlength="23" pattern="^[a-zA-Z0-9]{8,23}$" title="8-23 characters, alphanumeric" required>
 					<span role="button" :title="(visible ? 'hide' : 'show') + ' password'" aria-label="toggle password visibility" :aria-pressed="visible" @click="visible = !visible"></span>
 				</div>
 				<div class="pass-box">
 					<label for="password2">Confirm your password:</label>
-					<input v-model="user.pwd2" :type="visible ? 'text' : 'password'" id="password2" ref="_password2" placeholder="type your password again" minlength="8" maxlength="23" pattern="^[a-zA-Z0-9]{8,23}$" title="8-23 characters, alphanumeric" required>
+					<input v-model="user.pwd2" @input="checkPasswordSame" :type="visible ? 'text' : 'password'" id="password2" ref="_password2" placeholder="type your password again" minlength="8" maxlength="23" pattern="^[a-zA-Z0-9]{8,23}$" title="8-23 characters, alphanumeric" required>
 					<span role="button" :title="(visible ? 'hide' : 'show') + ' password'" aria-label="toggle password visibility" :aria-pressed="visible" @click="visible = !visible"></span>
 				</div>
-				<button type="submit" v-if="user.pwd && user.pwd === user.pwd2">Next step &rarr;</button>
+				<button type="submit" :class="{invalid: !user.pwd2 || user.pwd2 != user.pwd || !formIsValid}">Next step &rarr;</button>
 			</form>
 		</div>
 
@@ -150,6 +144,7 @@ export default class Registration extends Vue {
 	step = 0;
 	visible = false; // password is visible or hidden
 	exposed = false; // password has been leaked
+	exposedList = new Set(); // list of already-tried passwords
 	taken = false; // username is taken
 	user = {
 		email: "",
@@ -161,6 +156,12 @@ export default class Registration extends Vue {
 	recaptcha_key = process.env.VUE_APP_RECAPTCHA;
 
 	specialEvent = process.env.VUE_APP_EVENT?.trim() ?? ""; // special in-game events
+
+	formIsValid = false; // whether we can proceed to the next step
+
+	checkFormIsValid (evt: InputEvent) {
+		this.formIsValid = !!(evt.target && (evt.target as HTMLFormElement).reportValidity());
+	}
 
 	async mounted () {
 		// already loaded (user returned to this page)
@@ -236,6 +237,8 @@ export default class Registration extends Vue {
 			return hashSuffix.toUpperCase() === hs.toUpperCase();
 		});
 
+		this.exposedList.add(this.user.pwd);
+
 		if (found) {
 			// reset the animation
 			if (this.exposed) {
@@ -246,9 +249,28 @@ export default class Registration extends Vue {
 			this.exposed = true;
 			await this.$nextTick();
 			(this.$refs._password as HTMLInputElement).focus();
+			(this.$refs._password as HTMLInputElement).setCustomValidity("Choose a different password");
 		} else {
 			this.exposed = false;
 			this.step = 4;
+		}
+	}
+
+	resetPwValidity () {
+		if (this.exposedList.has(this.user.pwd)) {
+			(this.$refs._password as HTMLInputElement).setCustomValidity("Choose a different password");
+			this.exposed = true;
+		} else if (this.exposed) {
+			(this.$refs._password as HTMLInputElement).setCustomValidity("");
+		}
+		this.checkPasswordSame();
+	}
+
+	checkPasswordSame () {
+		if (this.user.pwd2 && this.user.pwd === this.user.pwd2) {
+			(this.$refs._password2 as HTMLInputElement).setCustomValidity("");
+		} else {
+			(this.$refs._password2 as HTMLInputElement).setCustomValidity("Passwords must match");
 		}
 	}
 
@@ -364,6 +386,10 @@ form {
 		padding: 1ch;
 		margin-top: 0.6ch;
 
+		&:invalid:not(:placeholder-shown) {
+			border: solid 1px red;
+		}
+
 		& + .pass-box {
 			margin-top: 1em;
 		}
@@ -401,7 +427,11 @@ form {
 		padding: 1ch;
 		text-decoration: none;
 
-		&:hover {
+		&:is(.invalid, [disabled]) {
+			opacity: .6;
+		}
+
+		&:not(:is(.invalid, [disabled])):hover {
 			background-color: #2F9E33;
 		}
 	}

@@ -11,7 +11,7 @@ export default class ReCaptchaLoader {
 	 */
 	static load () {
 		return new Promise((resolve, reject) => {
-			if (Reflect.has(self, "grecaptcha")) {
+			if (this.isReady) {
 				// we already have it loaded: reset it
 				this.instance.reset();
 				return resolve(this.instance);
