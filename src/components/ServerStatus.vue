@@ -12,6 +12,7 @@ aside :any-link {
 	color: #0E490B;
 	display: block;
 	padding: 8px;
+	contain: content;
 
 	&.offline {
 		color: #810909;
@@ -72,7 +73,7 @@ export default class ServerStatus extends Vue {
 	mounted () {
 		// use the last cached value to populate prior to first fetch:
 		if (Reflect.has(self, "localStorage")) {
-			this.Players = +(localStorage.getItem("onlinePlayers") || 99);
+			this.Players = +(localStorage.getItem("onlinePlayers") || 0);
 			this.Online = !!(localStorage.getItem("serverOnline") || true);
 		} else {
 			this.Players = 99;

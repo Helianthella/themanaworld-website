@@ -21,6 +21,7 @@
 	margin-bottom: 0;
 	padding-bottom: 1em;
 	hyphens: auto;
+	contain: content;
 
 	&:not(:last-of-type) {
 		padding-bottom: 3em;
@@ -72,6 +73,7 @@
 
 	& .body {
 		margin-top: 2ex;
+		contain: content;
 
 		&:deep(b) {
 			display: block;

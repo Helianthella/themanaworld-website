@@ -1,6 +1,6 @@
 <template>
+	<a href="#nav" class="hamburger" title="Jump to navigation menu">☰</a>
 	<nav class="nav" id="nav">
-		<a href="#nav" class="hamburger">☰</a>
 		<div>
 			<ul>
 				<li><router-link :class="{ 'custom-active': isHome }" :to="{ name: 'home' }">Home</router-link></li>
@@ -33,23 +33,23 @@
 </template>
 
 <style scoped>
+.hamburger {
+	position: absolute;
+	top: 3vw;
+	right: 2vw;
+	font-size: 8vw;
+	text-decoration: none;
+	color: gray(50);
+	z-index: 300;
+	display: block;
+}
+
 .nav {
 	background: #BA7A58;
 	color: #2f2e32;
 	border-radius: 0 0 15px 15px;
 	padding: 15px;
 	font-size: 14px;
-
-	& .hamburger {
-		position: absolute;
-		top: 0.4vw;
-		right: 2vw;
-		font-size: 8vw;
-		text-decoration: none;
-		color: gray(50);
-		z-index: 300;
-		display: block;
-	}
 
 	& div {
 		background: #CBA083;
@@ -129,22 +129,11 @@
 }
 
 @media (min-width: 1100px) {
+	.hamburger {
+		display: none;
+	}
 	.nav {
 		border-radius: 0 15px 15px 0;
-
-		& .hamburger {
-			display: none;
-		}
-	}
-}
-
-@media (min-width: 460px) {
-	.nav {
-		& .hamburger {
-			top: 3vw;
-			right: 2vw;
-			font-size: calc(1rem + 3vw);
-		}
 	}
 }
 </style>
