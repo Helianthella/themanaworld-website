@@ -1,8 +1,7 @@
 <template>
 	<router-link role="banner" :to="{ name: 'home' }" class="logo" title="Go to home page" aria-label="go back to the home page">
 		<span>The </span>Mana World
-		<!--<span>Feel the mana power growing inside you</span>-->
-		<span>A free open source 2D MMORPG in development</span>
+		<span>Feel the mana power growing inside you</span>
 	</router-link>
 </template>
 
@@ -55,7 +54,7 @@
 			position: absolute;
 			font-family: Helvetica;
 			font-size: 0.2em;
-			letter-spacing: 2px;
+			letter-spacing: 3.6px;
 			top: 99px;
 			left: 128px;
 			text-shadow: none;

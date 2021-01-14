@@ -18,9 +18,11 @@
 	z-index: 100;
 	& > .nav {
 		grid-area: side;
+		contain: content;
 	}
 	& > .header {
 		grid-area: logo;
+		contain: strict;
 	}
 	& > .content {
 		grid-area: page;
@@ -28,6 +30,7 @@
 		padding: 15px 15px 30px 15px;
 		border-radius: 15px 15px 0 0;
 		text-align: justify;
+		contain: content;
 		& h1 {
 			margin: 20px 0 0 0 0;
 			font-weight: bold;
@@ -41,6 +44,7 @@
 	}
 	& > .footer {
 		grid-area: footer;
+		contain: content;
 	}
 
 	& .dialog {

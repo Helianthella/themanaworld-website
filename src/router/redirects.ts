@@ -19,7 +19,7 @@ const redirects = [
 	},
 	{
 		path: "/downloads.php",
-		redirect: () => {
+		redirect () {
 			self.location.href = "https://wiki.themanaworld.org/index.php/Downloads";
 		}
 	},
