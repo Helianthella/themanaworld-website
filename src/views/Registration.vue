@@ -1,131 +1,129 @@
 <template>
-	<main class="registration">
-		<h1>Account creation</h1>
-		<p>Welcome to The Mana World! With this form you can register for a new game account.</p>
-		<p>Please note that you will also need to download and install <a href="https://wiki.themanaworld.org/index.php/Downloads" target="_blank">ManaPlus</a>, our official game client.</p>
-		<br>
-		<div class="specialEvent" v-if="specialEvent" v-html="specialEvent"></div>
-		<button v-if="!step" @click="isRecaptchaAccepted ? start() : step = -2">Begin!</button>
+	<h1>Account creation</h1>
+	<p>Welcome to The Mana World! With this form you can register for a new game account.</p>
+	<p>Please note that you will also need to download and install <a href="https://wiki.themanaworld.org/index.php/Downloads" target="_blank">ManaPlus</a>, our official game client.</p>
+	<br>
+	<div class="specialEvent" v-if="specialEvent" v-html="specialEvent"></div>
+	<button v-if="!step" @click="isRecaptchaAccepted ? start() : step = -2">Begin!</button>
 
-		<div v-if="step == -2">
-			<h1>reCAPTCHA privacy notice</h1>
-			<p>To prevent abuse, this registration form uses Google reCAPTCHA to verify that you are a human. By continuing, you agree to use reCAPTCHA, which may register tracking cookies in your browser.</p>
-			<p>You may review the Google Privacy Policy at <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">https://policies.google.com/privacy</a>.</p>
+	<div v-if="step == -2">
+		<h1>reCAPTCHA privacy notice</h1>
+		<p>To prevent abuse, this registration form uses Google reCAPTCHA to verify that you are a human. By continuing, you agree to use reCAPTCHA, which may register tracking cookies in your browser.</p>
+		<p>You may review the Google Privacy Policy at <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">https://policies.google.com/privacy</a>.</p>
 
-			<button @click="start">I understand and wish to proceed</button>
-			<br><br>
+		<button @click="start">I understand and wish to proceed</button>
+		<br><br>
 
-			<h1>Registering without reCAPTCHA</h1>
-			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
-			<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
+		<h1>Registering without reCAPTCHA</h1>
+		<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
+		<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
+	</div>
+
+	<div v-if="step == -3">
+		<h1>Loading...</h1>
+		<p>Please wait while reCAPTCHA is loading...</p>
+		<br><br>
+
+		<h1>Registering without reCAPTCHA</h1>
+		<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
+		<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
+	</div>
+
+	<div v-if="step == -1">
+		<h1>reCAPTCHA could not be loaded</h1>
+		<p>This page requires reCAPTCHA but something prevents it from loading.
+		If you are using an ad blocker or tracker blocker please whitelist this page and refresh to continue.</p>
+
+		<h1>Registering without reCAPTCHA</h1>
+		<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
+		<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
+	</div>
+
+	<!-- XXX: do we want to add the game rules here? -->
+
+	<div v-if="step == 1">
+		<h1>Email address</h1>
+		<p>We will never disclose your email address to anyone or send you spam.</p>
+		<p>Providing an email address is entirely optional but it is the only way to request a password reset, should you loose access to your account.
+		If you do not provide an email address you will be unable to perform password resets.</p>
+		<form @submit.prevent="checkEmail">
+			<label for="email">Enter your email (optional):</label>
+			<input v-model="user.email" type="email" maxlength="39" id="email" ref="_email" placeholder="your@email.com">
+			<button type="submit">Next step &rarr;</button>
+		</form>
+	</div>
+
+	<div v-if="step == 2">
+		<h1>Username</h1>
+		<p>Your username is used to log in to the game server. It is never shared with other players: only you see this name.</p>
+		<p>It must contain between 4 and 23 characters. Letters and numbers only.</p>
+
+		<div class="error taken" v-if="taken">
+			<h2>Username taken</h2>
+			<p>Please choose another username.</p>
 		</div>
 
-		<div v-if="step == -3">
-			<h1>Loading...</h1>
-			<p>Please wait while reCAPTCHA is loading...</p>
-			<br><br>
+		<form @submit.prevent="checkUser" @input="checkFormIsValid">
+			<label for="user">Choose a username:</label>
+			<input @input="taken = false" v-model="user.name" type="text" id="user" ref="_user" placeholder="type your username here" minlength="4" maxlength="23" pattern="^[a-zA-Z0-9]{4,23}$" title="4-23 characters, alphanumeric" required>
+			<button type="submit" :class="{invalid: !formIsValid}">Next step &rarr;</button>
+		</form>
+	</div>
 
-			<h1>Registering without reCAPTCHA</h1>
-			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
-			<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
+	<div v-if="step == 3">
+		<h1>Password</h1>
+		<p>Please choose a hard-to-guess password.</p>
+		<p>It must contain between 8 and 23 characters. Letters and numbers only. Case-sensitive.</p>
+
+		<div v-if="exposed" class="exposed">
+			<h2>WARNING: This password is compromised</h2>
+			This password has previously appeared in a data breach. Please use a more secure alternative.
+			<a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener">verified by haveibeenpwned.com</a>
 		</div>
 
-		<div v-if="step == -1">
-			<h1>reCAPTCHA could not be loaded</h1>
-			<p>This page requires reCAPTCHA but something prevents it from loading.
-			If you are using an ad blocker or tracker blocker please whitelist this page and refresh to continue.</p>
-
-			<h1>Registering without reCAPTCHA</h1>
-			<p>If you would rather not use reCAPTCHA, you may register by contacting us by email at <a href="mailto:registration@themanaworld.org">registration@themanaworld.org</a>.</p>
-			<p>We will create a new account for you and associate it with the email address that you used to contact us.</p>
-		</div>
-
-		<!-- XXX: do we want to add the game rules here? -->
-
-		<div v-if="step == 1">
-			<h1>Email address</h1>
-			<p>We will never disclose your email address to anyone or send you spam.</p>
-			<p>Providing an email address is entirely optional but it is the only way to request a password reset, should you loose access to your account.
-			If you do not provide an email address you will be unable to perform password resets.</p>
-			<form @submit.prevent="checkEmail">
-				<label for="email">Enter your email (optional):</label>
-				<input v-model="user.email" type="email" maxlength="39" id="email" ref="_email" placeholder="your@email.com">
-				<button type="submit">Next step &rarr;</button>
-			</form>
-		</div>
-
-		<div v-if="step == 2">
-			<h1>Username</h1>
-			<p>Your username is used to log in to the game server. It is never shared with other players: only you see this name.</p>
-			<p>It must contain between 4 and 23 characters. Letters and numbers only.</p>
-
-			<div class="error taken" v-if="taken">
-				<h2>Username taken</h2>
-				<p>Please choose another username.</p>
-			</div>
-
-			<form @submit.prevent="checkUser" @input="checkFormIsValid">
-				<label for="user">Choose a username:</label>
-				<input @input="taken = false" v-model="user.name" type="text" id="user" ref="_user" placeholder="type your username here" minlength="4" maxlength="23" pattern="^[a-zA-Z0-9]{4,23}$" title="4-23 characters, alphanumeric" required>
-				<button type="submit" :class="{invalid: !formIsValid}">Next step &rarr;</button>
-			</form>
-		</div>
-
-		<div v-if="step == 3">
-			<h1>Password</h1>
-			<p>Please choose a hard-to-guess password.</p>
-			<p>It must contain between 8 and 23 characters. Letters and numbers only. Case-sensitive.</p>
-
-			<div v-if="exposed" class="exposed">
-				<h2>WARNING: This password is compromised</h2>
-				This password has previously appeared in a data breach. Please use a more secure alternative.
-				<a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener">verified by haveibeenpwned.com</a>
-			</div>
-
-			<form @submit.prevent="checkPassword" @input="checkFormIsValid">
-				<div class="pass-box">
-					<label for="password">Choose a unique password:</label>
-					<input v-model="user.pwd" :type="visible ? 'text' : 'password'" @input="resetPwValidity" id="password" ref="_password" placeholder="type your password here" minlength="8" maxlength="23" pattern="^[a-zA-Z0-9]{8,23}$" title="8-23 characters, alphanumeric" required>
-					<span role="button" :title="(visible ? 'hide' : 'show') + ' password'" aria-label="toggle password visibility" :aria-pressed="visible" @click="visible = !visible"></span>
-				</div>
-				<div class="pass-box">
-					<label for="password2">Confirm your password:</label>
-					<input v-model="user.pwd2" @input="checkPasswordSame" :type="visible ? 'text' : 'password'" id="password2" ref="_password2" placeholder="type your password again" minlength="8" maxlength="23" pattern="^[a-zA-Z0-9]{8,23}$" title="8-23 characters, alphanumeric" required>
-					<span role="button" :title="(visible ? 'hide' : 'show') + ' password'" aria-label="toggle password visibility" :aria-pressed="visible" @click="visible = !visible"></span>
-				</div>
-				<button type="submit" :class="{invalid: !user.pwd2 || user.pwd2 != user.pwd || !formIsValid}">Next step &rarr;</button>
-			</form>
-		</div>
-
-		<div v-if="step == 4">
-			<h1>Confirm</h1>
-			<label for="c-email">Email address:</label>
-			<input id="c-email" disabled readonly type="email" :value="user.email" placeholder="(no email)">
-
-			<label for="c-user">Username:</label>
-			<input id="c-user" disabled readonly type="text" :value="user.name">
-
+		<form @submit.prevent="checkPassword" @input="checkFormIsValid">
 			<div class="pass-box">
-				<label for="c-pass">Password:</label>
-				<input id="c-pass" disabled readonly :type="visible ? 'text' : 'password'" :value="user.pwd">
+				<label for="password">Choose a unique password:</label>
+				<input v-model="user.pwd" :type="visible ? 'text' : 'password'" @input="resetPwValidity" id="password" ref="_password" placeholder="type your password here" minlength="8" maxlength="23" pattern="^[a-zA-Z0-9]{8,23}$" title="8-23 characters, alphanumeric" required>
 				<span role="button" :title="(visible ? 'hide' : 'show') + ' password'" aria-label="toggle password visibility" :aria-pressed="visible" @click="visible = !visible"></span>
 			</div>
-			<button @click="create">Create account</button>
-		</div>
+			<div class="pass-box">
+				<label for="password2">Confirm your password:</label>
+				<input v-model="user.pwd2" @input="checkPasswordSame" :type="visible ? 'text' : 'password'" id="password2" ref="_password2" placeholder="type your password again" minlength="8" maxlength="23" pattern="^[a-zA-Z0-9]{8,23}$" title="8-23 characters, alphanumeric" required>
+				<span role="button" :title="(visible ? 'hide' : 'show') + ' password'" aria-label="toggle password visibility" :aria-pressed="visible" @click="visible = !visible"></span>
+			</div>
+			<button type="submit" :class="{invalid: !user.pwd2 || user.pwd2 != user.pwd || !formIsValid}">Next step &rarr;</button>
+		</form>
+	</div>
 
-		<div v-if="step == 5">
-			<h1>Thank you</h1>
-			<p>Your account has been successfully created.</p>
+	<div v-if="step == 4">
+		<h1>Confirm</h1>
+		<label for="c-email">Email address:</label>
+		<input id="c-email" disabled readonly type="email" :value="user.email" placeholder="(no email)">
 
-			<h1>Next steps</h1>
-			<p>To start playing, <a href="https://wiki.themanaworld.org/index.php/Downloads">download ManaPlus</a> and select the server <i>The Mana World</i>.</p>
-		</div>
+		<label for="c-user">Username:</label>
+		<input id="c-user" disabled readonly type="text" :value="user.name">
 
-		<div class="g-recaptcha" id="recaptcha-container"
-			:data-sitekey="recaptcha_key"
-			data-size="invisible">
+		<div class="pass-box">
+			<label for="c-pass">Password:</label>
+			<input id="c-pass" disabled readonly :type="visible ? 'text' : 'password'" :value="user.pwd">
+			<span role="button" :title="(visible ? 'hide' : 'show') + ' password'" aria-label="toggle password visibility" :aria-pressed="visible" @click="visible = !visible"></span>
 		</div>
-	</main>
+		<button @click="create">Create account</button>
+	</div>
+
+	<div v-if="step == 5">
+		<h1>Thank you</h1>
+		<p>Your account has been successfully created.</p>
+
+		<h1>Next steps</h1>
+		<p>To start playing, <a href="https://wiki.themanaworld.org/index.php/Downloads">download ManaPlus</a> and select the server <i>The Mana World</i>.</p>
+	</div>
+
+	<div class="g-recaptcha" id="recaptcha-container"
+		:data-sitekey="recaptcha_key"
+		data-size="invisible">
+	</div>
 </template>
 
 <script lang="ts">
@@ -362,101 +360,99 @@ form {
 	color: #843732;
 }
 
-.registration {
-	& label {
-		display: block;
+label {
+	display: block;
 
-		&:nth-of-type(1n + 2) {
-			margin-top: 1em;
-		}
-	}
-
-	& .pass-box {
-		position: relative;
-
-		&:nth-of-type(1n + 2) {
-			margin-top: 1em;
-		}
-	}
-
-	& input {
-		width: calc(100% - 2ch);
-		border: 1px solid #2f2e32;
-		font-size: 15px;
-		padding: 1ch;
-		margin-top: 0.6ch;
-
-		&:invalid:not(:placeholder-shown) {
-			border: solid 1px red;
-		}
-
-		& + .pass-box {
-			margin-top: 1em;
-		}
-
-		& + span {
-			&::after {
-				content: "👁";
-				font-family: monospace;
-				padding: 0 0.5ch 0 0.5ch;
-			}
-
-			position: absolute;
-			right: -1px;
-			top: auto;
-			bottom: 0;
-			font-size: 1.9em;
-			cursor: pointer;
-		}
-
-		&[type="text"] + span {
-			background: rgba(0, 0, 0, 0.2);
-		}
-	}
-
-	& button {
+	&:nth-of-type(1n + 2) {
 		margin-top: 1em;
-		width: 100%;
-		background-color: #34B039;
-		border: 1px solid #2f2e32;
-		display: inline-block;
+	}
+}
+
+.pass-box {
+	position: relative;
+
+	&:nth-of-type(1n + 2) {
+		margin-top: 1em;
+	}
+}
+
+input {
+	width: calc(100% - 2ch);
+	border: 1px solid #2f2e32;
+	font-size: 15px;
+	padding: 1ch;
+	margin-top: 0.6ch;
+
+	&:invalid:not(:placeholder-shown) {
+		border: solid 1px red;
+	}
+
+	& + .pass-box {
+		margin-top: 1em;
+	}
+
+	& + span {
+		&::after {
+			content: "👁";
+			font-family: monospace;
+			padding: 0 0.5ch 0 0.5ch;
+		}
+
+		position: absolute;
+		right: -1px;
+		top: auto;
+		bottom: 0;
+		font-size: 1.9em;
 		cursor: pointer;
-		color: #ffffff;
-		font-size: 15px;
-		font-weight: bold;
-		padding: 1ch;
-		text-decoration: none;
-
-		&:is(.invalid, [disabled]) {
-			opacity: .6;
-		}
-
-		&:not(:is(.invalid, [disabled])):hover {
-			background-color: #2F9E33;
-		}
 	}
 
-	& > div:nth-of-type(1n + 2) {
-		margin-top: 30px;
+	&[type="text"] + span {
+		background: rgba(0, 0, 0, 0.2);
+	}
+}
+
+button {
+	margin-top: 1em;
+	width: 100%;
+	background-color: #34B039;
+	border: 1px solid #2f2e32;
+	display: inline-block;
+	cursor: pointer;
+	color: #ffffff;
+	font-size: 15px;
+	font-weight: bold;
+	padding: 1ch;
+	text-decoration: none;
+
+	&:is(.invalid, [disabled]) {
+		opacity: .6;
 	}
 
-	& .exposed {
-		background: rgba(255, 0, 0, 0.1);
-		border: dashed 6px rgba(255, 0, 0, 0.9);
-		padding: 1em;
-		margin: 1em;
-		animation-name: scary;
-		animation-duration: 2s;
-
-		& a {
-			display: block;
-			margin-top: 0.7em;
-		}
+	&:not(:is(.invalid, [disabled])):hover {
+		background-color: #2F9E33;
 	}
+}
 
-	& .error {
-		padding: 1em;
+div:nth-of-type(1n + 2) {
+	margin-top: 30px;
+}
+
+.exposed {
+	background: rgba(255, 0, 0, 0.1);
+	border: dashed 6px rgba(255, 0, 0, 0.9);
+	padding: 1em;
+	margin: 1em;
+	animation-name: scary;
+	animation-duration: 2s;
+
+	& a {
+		display: block;
+		margin-top: 0.7em;
 	}
+}
+
+.error {
+	padding: 1em;
 }
 
 @keyframes scary {
